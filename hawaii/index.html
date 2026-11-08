@@ -594,10 +594,14 @@
   <p class="lede">Have an update to share? Email it to <a href="mailto:sully@muse.ai"><b>sully@muse.ai</b></a> — or just enter it here.</p>
 
   <div class="card">
-    <form class="qform" id="qform">
+    <form class="qform" id="qform" action="https://formsubmit.co/sully@muse.ai" method="POST">
+      <input type="hidden" name="_subject" value="Hawaii trip question/update" />
+      <input type="hidden" name="_next" value="https://sullycool.github.io/hawaii/" />
+      <input type="hidden" name="_captcha" value="false" />
+      <input type="hidden" name="_template" value="table" />
       <div>
         <label for="qname">Your name</label>
-        <select id="qname" required>
+        <select id="qname" name="name" required>
           <option value="" disabled selected>Pick your name</option>
           <option>Todd</option>
           <option>Jeannie</option>
@@ -625,11 +629,11 @@
       </div>
       <div>
         <label for="qmsg">Your message</label>
-        <textarea id="qmsg" required placeholder="Type your question or update here…"></textarea>
+        <textarea id="qmsg" name="message" required placeholder="Type your question or update here…"></textarea>
       </div>
-      <button class="qsubmit" type="submit">Send via email</button>
+      <button class="qsubmit" type="submit">Send</button>
     </form>
-    <p class="small" style="margin:14px 0 0">Opens your mail app to <b>sully@muse.ai</b>, pre-filled — just hit send. Confirmed answers appear in the FAQ below.</p>
+    <p class="small" style="margin:14px 0 0">Sends directly to <b>sully@muse.ai</b> — no mail app needed. You'll be brought back here after sending. Confirmed answers appear in the FAQ below.</p>
   </div>
 
   <h3 style="font-size:24px;margin:28px 0 8px">FAQ</h3>
@@ -707,16 +711,6 @@
       if (!e.target.closest('.sitesearch')) hide();
     });
   })();
-  document.getElementById('qform').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var name = document.getElementById('qname').value;
-    var type = document.querySelector('input[name="qtype"]:checked').value;
-    var msg = document.getElementById('qmsg').value.trim();
-    if (!name || !msg) return;
-    var subject = 'Hawaii trip ' + type.toLowerCase() + ' from ' + name;
-    var body = msg + '\n\n— ' + name + ' (' + type + ', via the Hawaii trip page)';
-    window.location.href = 'mailto:sully@muse.ai?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  });
 </script>
 </body>
 </html>
