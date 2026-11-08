@@ -33,10 +33,33 @@
   /* nav — persistent / sticky at the top while scrolling */
   nav{position:sticky;top:0;z-index:100;width:100%;background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   section{scroll-margin-top:72px}
-  .navin{max-width:1060px;margin:0 auto;padding:10px 18px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-  .navin::-webkit-scrollbar{display:none}
-  .navin a{flex:0 0 auto;text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:600;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+  .navin{max-width:1060px;margin:0 auto;padding:10px 18px;display:flex;gap:10px;align-items:center}
+  .navlinks{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 auto;min-width:0;padding:2px 0}
+  .navlinks::-webkit-scrollbar{display:none}
+  .navin a{flex:0 0 auto;text-decoration:none;color:var(--ink);font-size:13.5px;font-weight:600;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
   .navin a:hover{border-color:var(--teal);color:var(--teal)}
+  .sitesearch{position:relative;flex:0 0 auto}
+  .sitesearch input{width:190px;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px 8px 34px}
+  .sitesearch input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+  .sitesearch input::placeholder{color:var(--muted)}
+  .sitesearch .sicon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
+  .search-results{position:absolute;top:calc(100% + 8px);right:0;width:min(430px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;z-index:200;max-height:min(62vh,520px);overflow-y:auto}
+  .search-results[hidden]{display:none}
+  .search-results button{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:11px 14px;cursor:pointer;color:var(--ink);font:inherit}
+  .search-results button:last-child{border-bottom:none}
+  .search-results button:hover,.search-results button:focus{background:var(--teal-soft);outline:none}
+  .search-results .rsec{display:block;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin-bottom:2px}
+  .search-results .rtext{display:block;font-size:14px;line-height:1.4;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .search-results .rnone{padding:13px 14px;font-size:14px;color:var(--muted)}
+  .search-hit{outline:3px solid var(--teal) !important;outline-offset:3px;border-radius:6px}
+  @media(max-width:700px){
+    .navin{flex-wrap:wrap;gap:8px}
+    .sitesearch{order:-1;width:100%}
+    .sitesearch input{width:100%}
+    .search-results{left:0;right:auto;width:100%}
+    .navlinks{flex-basis:100%}
+    section{scroll-margin-top:118px}
+  }
   /* hero */
   .hero{position:relative;overflow:hidden}
   .hero img{width:100%;height:min(52vh,480px);object-fit:cover;display:block}
@@ -123,16 +146,23 @@
 
 <nav aria-label="Trip sections">
   <div class="navin">
-    <a href="#overview">Overview</a>
-    <a href="#who">Who's going</a>
-    <a href="#flights">Flights</a>
-    <a href="#itinerary">Itinerary</a>
-    <a href="#lodging">Lodging</a>
-    <a href="#transport">Transport</a>
-    <a href="#dining">Dining</a>
-    <a href="#try">Things to Do</a>
-    <a href="#pending">Still pending</a>
-    <a href="#questions">Questions / Updates?</a>
+    <div class="navlinks">
+      <a href="#overview">Overview</a>
+      <a href="#who">Who's going</a>
+      <a href="#flights">Flights</a>
+      <a href="#itinerary">Itinerary</a>
+      <a href="#lodging">Lodging</a>
+      <a href="#transport">Transport</a>
+      <a href="#dining">Dining</a>
+      <a href="#try">Things to Do</a>
+      <a href="#pending">Still pending</a>
+      <a href="#questions">Questions / Updates?</a>
+    </div>
+    <div class="sitesearch" role="search">
+      <svg class="sicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="siteSearch" type="search" placeholder="Search this page…" aria-label="Search this page" autocomplete="off" />
+      <div class="search-results" id="searchResults" hidden></div>
+    </div>
   </div>
 </nav>
 
@@ -561,7 +591,7 @@
 <section id="questions">
   <div class="kicker">Questions / Updates?</div>
   <h2>Ask a question, or send an update</h2>
-  <p class="lede">Questions or updates from anyone on the trip. Opens your mail app to Sully.</p>
+  <p class="lede">Have an update to share? Email it to <a href="mailto:sully@muse.ai"><b>sully@muse.ai</b></a> — or just enter it here.</p>
 
   <div class="card">
     <form class="qform" id="qform">
@@ -614,6 +644,69 @@
 
 </main>
 <script>
+  // Page search — searches the text on this page and jumps to matches
+  (function () {
+    var input = document.getElementById('siteSearch');
+    var box = document.getElementById('searchResults');
+    if (!input || !box) return;
+    var candidates = [];
+    var sections = document.querySelectorAll('main section');
+    sections.forEach(function (sec) {
+      var titleEl = sec.querySelector('h2');
+      var title = titleEl ? titleEl.textContent.trim() : (sec.id || 'Page');
+      var els = sec.querySelectorAll('h2, h3, p, li, td');
+      var seen = {};
+      els.forEach(function (el) {
+        var text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!text || text.length < 3 || seen[text]) return;
+        seen[text] = true;
+        candidates.push({ el: el, text: text, section: title, sectionId: sec.id });
+      });
+    });
+    function hide() { box.hidden = true; box.innerHTML = ''; }
+    function goTo(item) {
+      hide();
+      item.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.querySelectorAll('.search-hit').forEach(function (n) { n.classList.remove('search-hit'); });
+      item.el.classList.add('search-hit');
+      setTimeout(function () { item.el.classList.remove('search-hit'); }, 2600);
+    }
+    function render(q) {
+      var query = q.trim().toLowerCase();
+      if (query.length < 2) { hide(); return; }
+      var hits = candidates.filter(function (c) { return c.text.toLowerCase().indexOf(query) !== -1; }).slice(0, 9);
+      box.innerHTML = '';
+      if (!hits.length) {
+        var none = document.createElement('div');
+        none.className = 'rnone';
+        none.textContent = 'No matches for “' + q.trim() + '”';
+        box.appendChild(none);
+      } else {
+        hits.forEach(function (hit) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          var sec = document.createElement('span'); sec.className = 'rsec'; sec.textContent = hit.section;
+          var txt = document.createElement('span'); txt.className = 'rtext'; txt.textContent = hit.text;
+          btn.appendChild(sec); btn.appendChild(txt);
+          btn.addEventListener('click', function () { goTo(hit); });
+          box.appendChild(btn);
+        });
+      }
+      box.hidden = false;
+    }
+    input.addEventListener('input', function () { render(input.value); });
+    input.addEventListener('focus', function () { if (input.value.trim().length >= 2) render(input.value); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        var first = box.querySelector('button');
+        if (first) first.click();
+      } else if (e.key === 'Escape') { input.value = ''; hide(); input.blur(); }
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.sitesearch')) hide();
+    });
+  })();
   document.getElementById('qform').addEventListener('submit', function (e) {
     e.preventDefault();
     var name = document.getElementById('qname').value;
